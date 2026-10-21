@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import api from "../axios";
+import Modal from "../components/Modal";
+import { useToast } from "../components/ToastProvider";
 
 export default function AdminDashboard() {
   const location = useLocation();
@@ -8,6 +10,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState(location.state?.message || "");
+  const [deleting, setDeleting] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const { toast } = useToast();
 
   function fetchEvents() {
     setLoading(true);
@@ -19,6 +24,28 @@ export default function AdminDashboard() {
         setError(e.response?.data?.message || "Could not load events."),
       )
       .finally(() => setLoading(false));
+  }
+
+  async function deleteEvent() {
+    if (!deleteTarget) return;
+    const event = deleteTarget;
+    setDeleting(event.id);
+    setError("");
+    setNotice("");
+    try {
+      await api.delete(`/events/${event.id}`);
+      setEvents((current) => current.filter((item) => item.id !== event.id));
+      setNotice(`"${event.name}" was deleted successfully.`);
+      toast.success(`"${event.name}" was deleted successfully.`);
+      setDeleteTarget(null);
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Could not delete event. Please try again.";
+      setError(message);
+      toast.error(message);
+    } finally {
+      setDeleting(null);
+    }
   }
 
   // Initial synchronization
@@ -200,18 +227,67 @@ export default function AdminDashboard() {
                     )}
                   </div>
 
-                  <Link
-                    to={`/events/${event.id}`}
-                    className="button-secondary shrink-0 text-xs font-semibold self-start sm:self-auto"
-                  >
-                    View Details ↗
-                  </Link>
+                  <div className="flex shrink-0 flex-wrap gap-2 self-start sm:self-auto">
+                    <Link
+                      to={`/events/${event.id}`}
+                      className="button-secondary text-xs font-semibold"
+                    >
+                      View Details ↗
+                    </Link>
+                    <Link
+                      to={`/admin/events/${event.id}/edit`}
+                      className="button-secondary text-xs font-semibold"
+                    >
+                      Edit
+                    </Link>
+                    <button
+                      type="button"
+                      disabled={deleting === event.id}
+                      onClick={() => setDeleteTarget(event)}
+                      className="button-secondary text-xs font-semibold hover:border-red-300 hover:text-red-700"
+                    >
+                      {deleting === event.id ? "Deleting…" : "Delete"}
+                    </button>
+                  </div>
                 </article>
               );
             })}
           </div>
         )}
       </section>
+      <Modal
+        open={Boolean(deleteTarget)}
+        title="Delete this event?"
+        description={
+          deleteTarget
+            ? `“${deleteTarget.name}” will be permanently removed. Events with existing bookings cannot be deleted.`
+            : ""
+        }
+        destructive
+        busy={Boolean(deleting)}
+        onClose={() => {
+          if (!deleting) setDeleteTarget(null);
+        }}
+      >
+        <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            disabled={Boolean(deleting)}
+            onClick={() => setDeleteTarget(null)}
+            className="button-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            disabled={Boolean(deleting)}
+            onClick={deleteEvent}
+            className="button-primary !border-red-700 !bg-red-700 hover:!border-red-800 hover:!bg-red-800"
+          >
+            {deleting ? "Deleting…" : "Delete Event"}
+          </button>
+        </div>
+      </Modal>
     </main>
   );
 }

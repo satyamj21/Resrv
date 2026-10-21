@@ -4,6 +4,7 @@ import api from "../axios";
 import SeatGrid from "../components/SeatGrid";
 import { useAuth } from "../context/AuthContext";
 import { getEventImage } from "../utils/eventImage";
+import { useToast } from "../components/ToastProvider";
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -17,6 +18,7 @@ export default function EventDetails() {
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const { toast } = useToast();
 
   const isAdmin = user?.role === "admin";
 
@@ -49,9 +51,12 @@ export default function EventDetails() {
       });
       setHold({ id: data.holdId, seat: selectedSeat });
       setMessage("Seat held temporarily! Please confirm your booking to secure your ticket.");
+      toast.success("Seat held for 10 minutes.");
       await load();
     } catch (e) {
-      setError(e.response?.data?.message || "Could not hold seat.");
+      const message = e.response?.data?.message || "Could not hold seat.";
+      setError(message);
+      toast.error(message);
     } finally {
       setWorking(false);
     }
@@ -62,11 +67,15 @@ export default function EventDetails() {
     setError("");
     try {
       await api.post("/bookings/confirm", { holdId: hold.id });
+      toast.success("Your booking was confirmed successfully!");
       navigate("/my-bookings", {
         state: { message: "Your booking was confirmed successfully!" },
       });
     } catch (e) {
-      setError(e.response?.data?.message || "Could not confirm your booking.");
+      const message =
+        e.response?.data?.message || "Could not confirm your booking.";
+      setError(message);
+      toast.error(message);
       setHold(null);
       await load().catch(() => {});
     } finally {

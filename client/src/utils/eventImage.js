@@ -41,7 +41,16 @@ export function getEventImage(event = {}) {
   if (text.includes("symphony") || text.includes("orchestra") || text.includes("opera") || text.includes("classical")) {
     return EVENT_IMAGES.classical;
   }
-  if (text.includes("art") || text.includes("exhibit") || text.includes("gallery") || text.includes("design") || text.includes("photo")) {
+  if (
+    text.includes("art") ||
+    text.includes("exhibition") ||
+    text.includes("exhibit") ||
+    text.includes("gallery") ||
+    text.includes("painting") ||
+    text.includes("contemporary art") ||
+    text.includes("design") ||
+    text.includes("photo")
+  ) {
     return EVENT_IMAGES.art;
   }
   if (text.includes("theatre") || text.includes("theater") || text.includes("drama") || text.includes("play") || text.includes("act")) {

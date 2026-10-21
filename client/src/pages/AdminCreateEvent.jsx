@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../axios";
+import { useToast } from "../components/ToastProvider";
 
 export default function AdminCreateEvent() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function AdminCreateEvent() {
   });
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -33,11 +35,13 @@ export default function AdminCreateEvent() {
       navigate("/admin", {
         state: { message: `"${form.name}" was published successfully!` },
       });
+      toast.success(`"${form.name}" was published successfully!`);
     } catch (err) {
-      setError(
+      const message =
         err.response?.data?.message ||
-          "Could not create event. Please verify all fields and try again.",
-      );
+        "Could not create event. Please verify all fields and try again.";
+      setError(message);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }

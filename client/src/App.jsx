@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/AdminLayout";
@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import MyBookings from "./pages/MyBookings";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminCreateEvent from "./pages/AdminCreateEvent";
+import AdminEditEvent from "./pages/AdminEditEvent";
 
 function PublicLayout() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/events/new" element={<AdminCreateEvent />} />
+            <Route path="/admin/events/:id/edit" element={<AdminEditEvent />} />
           </Route>
         </Route>
 

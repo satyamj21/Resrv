@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import api from "../axios";
+import Modal from "../components/Modal";
+import { useToast } from "../components/ToastProvider";
 
 export default function MyBookings() {
   const location = useLocation();
@@ -9,6 +11,8 @@ export default function MyBookings() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState(location.state?.message || "");
   const [cancelling, setCancelling] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const { toast } = useToast();
 
   async function load() {
     const { data } = await api.get("/bookings/my-bookings");
@@ -25,8 +29,9 @@ export default function MyBookings() {
       .finally(() => setLoading(false));
   }, []);
 
-  async function cancel(id) {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+  async function cancel() {
+    if (!cancelTarget) return;
+    const id = cancelTarget.booking_id;
     setCancelling(id);
     setError("");
     try {
@@ -39,8 +44,13 @@ export default function MyBookings() {
         ),
       );
       setNotice("Booking cancelled successfully.");
+      toast.success("Booking cancelled successfully.");
+      setCancelTarget(null);
     } catch (e) {
-      setError(e.response?.data?.message || "Could not cancel this booking.");
+      const message =
+        e.response?.data?.message || "Could not cancel this booking.";
+      setError(message);
+      toast.error(message);
     } finally {
       setCancelling(null);
     }
@@ -154,7 +164,7 @@ export default function MyBookings() {
                   {isActive && (
                     <button
                       disabled={cancelling === booking.booking_id}
-                      onClick={() => cancel(booking.booking_id)}
+                      onClick={() => setCancelTarget(booking)}
                       className="button-secondary text-xs !py-1.5 !px-3 hover:border-red-300 hover:text-red-700"
                     >
                       {cancelling === booking.booking_id
@@ -168,6 +178,39 @@ export default function MyBookings() {
           })}
         </div>
       )}
+      <Modal
+        open={Boolean(cancelTarget)}
+        title="Cancel this booking?"
+        description={
+          cancelTarget
+            ? `Your reservation for ${cancelTarget.event_name}, seat ${cancelTarget.seat_number}, will be cancelled and the seat released.`
+            : ""
+        }
+        destructive
+        busy={Boolean(cancelling)}
+        onClose={() => {
+          if (!cancelling) setCancelTarget(null);
+        }}
+      >
+        <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            disabled={Boolean(cancelling)}
+            onClick={() => setCancelTarget(null)}
+            className="button-secondary"
+          >
+            Keep Booking
+          </button>
+          <button
+            type="button"
+            disabled={Boolean(cancelling)}
+            onClick={cancel}
+            className="button-primary !border-red-700 !bg-red-700 hover:!border-red-800 hover:!bg-red-800"
+          >
+            {cancelling ? "Cancelling…" : "Cancel Booking"}
+          </button>
+        </div>
+      </Modal>
     </main>
   );
 }

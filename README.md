@@ -96,6 +96,7 @@ There is no real payment provider or payment authorization step. The confirmatio
 │   │   ├── pages/
 │   │   │   ├── AdminCreateEvent.jsx
 │   │   │   ├── AdminDashboard.jsx
+│   │   │   ├── AdminEditEvent.jsx
 │   │   │   ├── EventDetails.jsx
 │   │   │   ├── Events.jsx
 │   │   │   ├── Login.jsx
@@ -285,6 +286,8 @@ All API paths below are relative to `http://localhost:5000/api`. Protected endpo
 | `GET` | `/events` | List events ordered by creation time | Public |
 | `GET` | `/events/:id` | Return an event and its seat map | Public |
 | `POST` | `/events` | Create an event and generate its seats | Authenticated `admin` |
+| `PUT` | `/events/:id` | Update event title, description, date/time, or capacity; capacity cannot remove booked or actively held seats | Authenticated `admin` |
+| `DELETE` | `/events/:id` | Delete an event after rejecting any event with existing bookings; active holds are cancelled safely | Authenticated `admin` |
 | `POST` | `/bookings/hold` | Hold one available seat for 10 minutes; body: `{ "seatId": number }` | Authenticated `user` |
 | `POST` | `/bookings/confirm` | Confirm an active hold; body: `{ "holdId": number }` | Authenticated `user` |
 | `GET` | `/bookings/my-bookings` | List the current user's bookings | Authenticated `user` |
@@ -341,7 +344,7 @@ The following are not currently implemented and are potential next steps:
 - Add versioned migrations and a safe development seed process.
 - Add a scheduled job to expire and release stale holds proactively.
 - Add automated unit, integration, and end-to-end tests.
-- Add event editing, deletion, capacity reporting, and richer administrative booking management.
+- Add capacity reporting and richer administrative booking management.
 - Add production configuration for trusted origins, HTTPS, observability, and rate limiting.
 - Add email confirmations and ticket/receipt generation.
 
