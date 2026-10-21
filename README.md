@@ -17,7 +17,7 @@ Resrv is a full-stack event ticket booking platform built around a transactional
 - PostgreSQL transactions and row-level locks for seat-booking concurrency
 - Parameterized raw SQL queries through the `pg` client
 
-## Screenshots
+<!-- ## Screenshots
 
 Screenshots are not currently included in the repository.
 
@@ -26,7 +26,7 @@ Suggested screenshots for a future portfolio presentation:
 - `[Screenshot placeholder: public event catalogue]`
 - `[Screenshot placeholder: event detail and seat selector]`
 - `[Screenshot placeholder: user booking history]`
-- `[Screenshot placeholder: administrator event dashboard]`
+- `[Screenshot placeholder: administrator event dashboard]` -->
 
 ## Tech stack
 
